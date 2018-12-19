@@ -8,6 +8,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -40,24 +42,51 @@ public class NettyClient {
 
 //逻辑处理器
 class ClientHandler extends ChannelInboundHandlerAdapter{
-    /**
-     * 连接成功建立后 调用的方法
-     * @param ctx
-     * @throws Exception
-     */
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("逻辑处理器被添加：handlerAdded()");
+        super.handlerAdded(ctx);
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel 绑定到线程(NioEventLoop)：channelRegistered()");
+        super.channelRegistered(ctx);
+    }
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println(new Date()+":客户端写出数据");
-        //获取一个ByteBuffer的内存管理器，再分配buffer
-        ByteBuf buffer = ctx.alloc().buffer();
-        byte[] bytes = "hello".getBytes("UTF-8");
-        buffer.writeBytes(bytes);
-        ctx.channel().writeAndFlush(buffer);
+        System.out.println("channel 准备就绪：channelActive()");
+        super.channelActive(ctx);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf buf= (ByteBuf) msg;
-        System.out.println("read it : "+buf.toString(Charset.forName("utf-8")));
+        System.out.println("channel 有数据可读：channelRead()");
+        super.channelRead(ctx, msg);
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel 某次数据读完：channelReadComplete()");
+        super.channelReadComplete(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel 被关闭：channelInactive()");
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel 取消线程(NioEventLoop) 的绑定: channelUnregistered()");
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("逻辑处理器被移除：handlerRemoved()");
+        super.handlerRemoved(ctx);
     }
 }
